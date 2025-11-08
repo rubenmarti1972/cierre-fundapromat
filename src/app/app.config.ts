@@ -21,12 +21,15 @@ function initAnonymousAuth(auth: Auth) {
   };
 }
 
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideRouter(routes),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage()),
+const providers: any[] = [
+  provideRouter(routes),
+  provideFirebaseApp(() => initializeApp(environment.firebase)),
+  provideFirestore(() => getFirestore()),
+  provideStorage(() => getStorage())
+];
+
+if ((environment as any).useFirebaseStorage) {
+  providers.push(
     provideAuth(() => getAuth()),
     {
       provide: APP_INITIALIZER,
@@ -34,5 +37,9 @@ export const appConfig: ApplicationConfig = {
       deps: [Auth],
       multi: true
     }
-  ]
+  );
+}
+
+export const appConfig: ApplicationConfig = {
+  providers
 };

@@ -23,6 +23,7 @@ import {
 
 import { Observable } from 'rxjs';
 import { Post } from '../models/post';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PostService {
@@ -30,7 +31,18 @@ export class PostService {
   private firestore = inject(Firestore);
   private storage = inject(Storage);
 
+  private readonly useStorage = !!(environment as any).useFirebaseStorage;
+
   private collectionRef = collection(this.firestore, 'posts');
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer el archivo.'));
+      reader.readAsDataURL(file);
+    });
+  }
 
   /**
    * Crear post + subir imagen si existe
@@ -38,24 +50,29 @@ export class PostService {
   async create(post: Partial<Post>, file?: File): Promise<void> {
     try {
       let photoUrl = '';
-      let photoPath = '';
+      let photoPath: string | null = null;
 
       if (file) {
-        console.log('📤 Subiendo imagen:', file.name);
+        if (this.useStorage) {
+          console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
 
-        const timestamp = Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-        photoPath = `photos/${timestamp}_${safeName}`;
+          const timestamp = Date.now();
+          const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+          photoPath = `photos/${timestamp}_${safeName}`;
 
-        const storageRef = ref(this.storage, photoPath);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+          const storageRef = ref(this.storage, photoPath);
+          const uploadTask = uploadBytesResumable(storageRef, file);
 
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on('state_changed', () => {}, reject, resolve);
-        });
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on('state_changed', () => {}, reject, resolve);
+          });
 
-        photoUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log('✅ Imagen subida:', photoUrl);
+          photoUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('✅ Imagen subida:', photoUrl);
+        } else {
+          console.log('📸 Convertiendo imagen a Data URL (Storage deshabilitado):', file.name);
+          photoUrl = await this.fileToDataUrl(file);
+        }
       }
 
       await addDoc(this.collectionRef, {
@@ -93,7 +110,7 @@ export class PostService {
       // Si hay 3 argumentos, el 3ro es photoPath; si no, el 2do puede ser photoPath
       const photoPath = (b !== undefined ? b : a) ?? null;
 
-      if (photoPath && photoPath.trim().length > 0) {
+      if (this.useStorage && photoPath && photoPath.trim().length > 0) {
         try {
           await deleteObject(ref(this.storage, photoPath));
         } catch (e) {
