@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   adminCode: 'gratitud2025',
+  useFirebaseStorage: false,
   firebase: {
     apiKey: "AIzaSyBSA2-EFTx5Jis4oxgYUIn0MpItTPnQYm4",
     authDomain: "jolgorios-f5048.firebaseapp.com",
