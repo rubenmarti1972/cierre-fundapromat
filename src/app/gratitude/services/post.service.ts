@@ -53,12 +53,11 @@ export class PostService {
       let photoPath: string | null = null;
 
       if (file) {
-        if (this.useStorage) {
-          console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
+        console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
 
-          const timestamp = Date.now();
-          const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-          photoPath = `photos/${timestamp}_${safeName}`;
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        photoPath = `photos/${timestamp}_${safeName}`;
 
           const storageRef = ref(this.storage, photoPath);
           const uploadTask = uploadBytesResumable(storageRef, file);

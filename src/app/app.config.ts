@@ -15,21 +15,21 @@ function initAnonymousAuth(auth: Auth) {
       return Promise.resolve();
     }
 
-    return signInAnonymously(auth).then(() => undefined).catch(error => {
-      console.error('No fue posible iniciar sesión anónima en Firebase.', error);
-    });
+    return signInAnonymously(auth)
+      .then(() => undefined)
+      .catch(error => {
+        console.error('No fue posible iniciar sesión anónima en Firebase.', error);
+        throw error;
+      });
   };
 }
 
-const providers: any[] = [
-  provideRouter(routes),
-  provideFirebaseApp(() => initializeApp(environment.firebase)),
-  provideFirestore(() => getFirestore()),
-  provideStorage(() => getStorage())
-];
-
-if ((environment as any).useFirebaseStorage) {
-  providers.push(
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirestore(() => getFirestore()),
+    provideStorage(() => getStorage()),
     provideAuth(() => getAuth()),
     {
       provide: APP_INITIALIZER,
@@ -37,9 +37,5 @@ if ((environment as any).useFirebaseStorage) {
       deps: [Auth],
       multi: true
     }
-  );
-}
-
-export const appConfig: ApplicationConfig = {
-  providers
+  ]
 };
