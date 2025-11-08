@@ -14,14 +14,6 @@
     <div class="err" *ngIf="showError('name','maxlength')">⚠️ Máximo 80 caracteres.</div>
 
     <label>
-      <span class="label-text">🌎 País *</span>
-      <input type="text" formControlName="country" placeholder="¿Desde qué país escribes?" />
-    </label>
-    <div class="err" *ngIf="showError('country','required')">⚠️ El país es obligatorio.</div>
-    <div class="err" *ngIf="showError('country','minlength')">⚠️ Mínimo 2 caracteres.</div>
-    <div class="err" *ngIf="showError('country','maxlength')">⚠️ Máximo 80 caracteres.</div>
-
-    <label>
       <span class="label-text">💬 Mensaje *</span>
       <textarea formControlName="message" placeholder="Escribe tu mensaje (máximo 200 caracteres)"></textarea>
     </label>

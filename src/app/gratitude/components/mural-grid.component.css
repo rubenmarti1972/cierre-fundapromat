@@ -124,27 +124,10 @@
   flex: 1;
 }
 
-
 .card .name {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.card .name-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.card .name-text .person {
-  font-weight: 600;
-  color: var(--dark-text);
-}
-
-.card .name-text .country {
-  color: #6c7a89;
-  letter-spacing: 0.2px;
 }
 
 .card .name i {

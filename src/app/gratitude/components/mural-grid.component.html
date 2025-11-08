@@ -57,12 +57,9 @@
       <div class="card-content">
         <div class="name">
           <i class="fa-solid fa-user-circle"></i>
-          <div class="name-text">
-            <span class="person">{{ it?.name }}</span>
-            <small class="country" *ngIf="it?.country">Desde {{ it.country }}</small>
-          </div>
+          {{ it?.name }}
         </div>
-
+        
         <div class="msg">{{ it?.message }}</div>
         
         <small *ngIf="toDate(it?.createdAt) as d" class="date">

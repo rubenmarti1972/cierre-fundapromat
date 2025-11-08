@@ -44,7 +44,7 @@ export class PostService {
   private readonly firebaseStream$ = defer(() =>
     collectionData(query(this.collectionRef, orderBy('createdAt', 'desc')), { idField: 'id' })
   ).pipe(
-    map(posts => (posts as Post[]).map(p => this.withDefaults(p))),
+    map(posts => posts as Post[]),
     tap({
       next: () => {
         this.localMode = false;
@@ -55,6 +55,15 @@ export class PostService {
       return this.localPosts$;
     })
   );
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer el archivo.'));
+      reader.readAsDataURL(file);
+    });
+  }
 
   /**
    * Crear post + subir imagen si existe
@@ -93,7 +102,6 @@ export class PostService {
 
       await addDoc(this.collectionRef, {
         name: post.name ?? '',
-        country: post.country ?? '',
         message: post.message ?? '',
         photoUrl,
         photoPath,
@@ -200,23 +208,20 @@ export class PostService {
     const entry: Post = {
       id,
       name: post.name ?? '',
-      country: post.country ?? '',
       message: post.message ?? '',
       photoUrl,
       photoPath: null,
       createdAt: Date.now()
     };
 
-    const posts = [entry, ...this.localPosts$.value].map(p => this.withDefaults(p));
+    const posts = [entry, ...this.localPosts$.value];
     this.localPosts$.next(posts);
     this.persistLocalPosts();
     console.log('📝 Post guardado en modo local');
   }
 
   private removeLocal(id: string): void {
-    const posts = this.localPosts$.value
-      .filter(p => p.id !== id)
-      .map(p => this.withDefaults(p));
+    const posts = this.localPosts$.value.filter(p => p.id !== id);
     this.localPosts$.next(posts);
     this.persistLocalPosts();
     console.log('🗑️ Post eliminado (modo local)');
@@ -254,10 +259,7 @@ export class PostService {
         return [];
       }
       const parsed = JSON.parse(raw) as Post[];
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
-      return parsed.map(p => this.withDefaults(p));
+      return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       console.warn('No se pudo leer el mural local:', error);
       return [];
@@ -270,7 +272,7 @@ export class PostService {
     }
 
     try {
-      const serialized = JSON.stringify(this.localPosts$.value.map(p => this.withDefaults(p)));
+      const serialized = JSON.stringify(this.localPosts$.value);
       window.localStorage.setItem(this.localStorageKey, serialized);
     } catch (error) {
       console.warn('No se pudo guardar el mural local:', error);
@@ -286,18 +288,5 @@ export class PostService {
     });
 
     return result;
-  }
-
-  private withDefaults(post: Partial<Post> | undefined = {}): Post {
-    const value = post ?? {};
-    return {
-      id: value.id,
-      name: value.name ?? '',
-      country: value.country ?? '',
-      message: value.message ?? '',
-      photoUrl: value.photoUrl ?? null,
-      photoPath: value.photoPath ?? null,
-      createdAt: value.createdAt
-    };
   }
 }
