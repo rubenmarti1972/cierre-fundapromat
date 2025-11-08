@@ -70,12 +70,13 @@ export class PostService {
       let photoPath: string | null = null;
 
       if (file) {
-        console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
-
         const timestamp = Date.now();
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
         photoPath = `photos/${timestamp}_${safeName}`;
 
+        if (this.useStorage) {
+          console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
+          
           const storageRef = ref(this.storage, photoPath);
           const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -146,7 +147,7 @@ export class PostService {
         try {
           await deleteObject(ref(this.storage, photoPath));
         } catch (e) {
-          console.warn('⚠️ No se encontró/borro la imagen:', photoPath, e);
+          console.warn('⚠️ No se encontró/borró la imagen:', photoPath, e);
         }
       }
 
@@ -288,16 +289,15 @@ export class PostService {
     return result;
   }
 
-  private withDefaults(post: Partial<Post> | undefined = {}): Post {
-    const value = post ?? {};
+  private withDefaults(post: Partial<Post>): Post {
     return {
-      id: value.id,
-      name: value.name ?? '',
-      country: value.country ?? '',
-      message: value.message ?? '',
-      photoUrl: value.photoUrl ?? null,
-      photoPath: value.photoPath ?? null,
-      createdAt: value.createdAt
+      id: post.id ?? '',
+      name: post.name ?? '',
+      country: post.country ?? '',
+      message: post.message ?? '',
+      photoUrl: post.photoUrl ?? null,
+      photoPath: post.photoPath ?? null,
+      createdAt: post.createdAt
     };
   }
 }
