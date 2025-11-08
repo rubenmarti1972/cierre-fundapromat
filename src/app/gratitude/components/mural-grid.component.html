@@ -2,48 +2,6 @@
   <div class="mural-header">
     <h1>🎨 Mural de Mensajes Matemáticos 🎨</h1>
     <p>Compartiendo nuestras experiencias con Fundapromat</p>
-    <p class="public-notice" *ngIf="!adminUnlocked">
-      <i class="fa-solid fa-eye"></i>
-      Estás viendo el mural en modo público
-    </p>
-  </div>
-
-  <div class="toolbar">
-    <a routerLink="/form">
-      <button class="ghost">
-        <i class="fa-solid fa-arrow-left"></i>
-        Volver al Formulario
-      </button>
-    </a>
-    
-    <span class="badge" [class.unlocked]="adminUnlocked">
-      <i class="fa-solid" [class.fa-lock]="!adminUnlocked" [class.fa-unlock]="adminUnlocked"></i>
-      {{ adminHint }}
-    </span>
-    
-    <button class="secondary" (click)="unlock()">
-      <i class="fa-solid fa-key"></i>
-      Alternar Admin
-    </button>
-    
-    <span class="spacer"></span>
-    
-    <button class="secondary download-btn" (click)="downloadPNG()" title="Descargar mural como imagen">
-      <i class="fa-solid fa-download"></i>
-      Descargar PNG
-    </button>
-    
-    <button class="danger" *ngIf="adminUnlocked" (click)="clearAll()" title="Borrar todo el mural">
-      <i class="fa-solid fa-trash"></i>
-      Limpiar Todo
-    </button>
-  </div>
-
-  <div class="stats-bar" *ngIf="items && items.length > 0">
-    <div class="stat-item">
-      <i class="fa-solid fa-images"></i>
-      <span>{{ items.length }} {{ items.length === 1 ? 'mensaje' : 'mensajes' }}</span>
-    </div>
   </div>
 
   <div id="muralContainer" class="grid">
@@ -94,3 +52,35 @@
     </a>
   </div>
 </div>
+<div class="toolbar">
+    <a routerLink="/form">
+      <button class="ghost">
+        <i class="fa-solid fa-arrow-left"></i>
+        Volver al Formulario
+      </button>
+    </a>
+    
+    <span class="badge" [class.unlocked]="adminUnlocked">
+      <i class="fa-solid" [class.fa-lock]="!adminUnlocked" [class.fa-unlock]="adminUnlocked"></i>
+      {{ adminHint }}
+    </span>
+    
+    <button class="secondary" (click)="unlock()">
+      <i class="fa-solid fa-key"></i>
+      Alternar Admin
+    </button>
+    
+    <span class="spacer"></span>
+    
+    <button class="danger" *ngIf="adminUnlocked" (click)="clearAll()" title="Borrar todo el mural">
+      <i class="fa-solid fa-trash"></i>
+      Limpiar Todo
+    </button>
+  </div>
+
+  <div class="stats-bar" *ngIf="items && items.length > 0">
+    <div class="stat-item">
+      <i class="fa-solid fa-images"></i>
+      <span>{{ items.length }} {{ items.length === 1 ? 'mensaje' : 'mensajes' }}</span>
+    </div>
+  </div>
