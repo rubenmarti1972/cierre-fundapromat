@@ -16,7 +16,7 @@ import { RouterOutlet, RouterLink } from "@angular/router";
           />
         </div>
         <div class="col-9">
-          <h1>Cierre de los jolgorios</h1>
+          <h1>Cierre de los Jolgorios</h1>
         </div>
       </div>
       <nav class="toolbar">

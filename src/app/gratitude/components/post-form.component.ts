@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angu
 import { RouterLink } from '@angular/router';
 import { PostService } from '../services/post.service';
 import { Router } from '@angular/router';
+import { Post } from '../models/post';
 
 interface MathSticker {
   name: string;
@@ -33,6 +34,7 @@ export class PostFormComponent {
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+    country: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     message: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
   });
 
@@ -71,7 +73,7 @@ export class PostFormComponent {
     this.status = '📤 Publicando tu mensaje...';
     
     try {
-      const { name, message } = this.form.getRawValue();
+      const { name, country, message } = this.form.getRawValue();
       
       // Si es sticker, convertir la URL a File
       let fileToUpload = this.photoFile;
@@ -83,16 +85,16 @@ export class PostFormComponent {
         fileToUpload = new File([blob], this.selectedSticker.name + '.png', { type: 'image/png' });
       }
 
-      await this.posts.create(
-        { 
-          name: (name || '').trim(), 
-          message: (message || '').trim() 
-        } as any,
-        fileToUpload ?? undefined
-      );
+      const payload: Partial<Post> = {
+        name: (name || '').trim(),
+        country: (country || '').trim(),
+        message: (message || '').trim()
+      };
+
+      await this.posts.create(payload, fileToUpload ?? undefined);
       
       this.status = '✅ ¡Publicado exitosamente!';
-      this.form.reset();
+      this.form.reset({ name: '', country: '', message: '' });
       this.photoFile = null;
       this.selectedSticker = null;
       this.photoMode = 'upload';
@@ -114,7 +116,7 @@ export class PostFormComponent {
     return this.form.controls; 
   }
   
-  showError(ctrl: 'name' | 'message', error: string) {
+  showError(ctrl: 'name' | 'country' | 'message', error: string) {
     const c = this.f[ctrl];
     return c.touched && c.errors?.[error];
   }
