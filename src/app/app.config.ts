@@ -18,8 +18,8 @@ function initAnonymousAuth(auth: Auth) {
     return signInAnonymously(auth)
       .then(() => undefined)
       .catch(error => {
-        console.error('No fue posible iniciar sesión anónima en Firebase.', error);
-        throw error;
+        console.warn('No fue posible iniciar sesión anónima en Firebase. El modo sin conexión estará activo.', error);
+        return undefined;
       });
   };
 }
