@@ -38,14 +38,14 @@ export class PostService {
   async create(post: Partial<Post>, file?: File): Promise<void> {
     try {
       let photoUrl = '';
-      let photoPath = '';
+      let photoPath: string | null = null;
 
       if (file) {
-        console.log('📤 Subiendo imagen:', file.name);
+        console.log('📤 Subiendo imagen a Firebase Storage:', file.name);
 
         const timestamp = Date.now();
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-        photoPath = `posts/${timestamp}_${safeName}`;
+        photoPath = `photos/${timestamp}_${safeName}`;
 
         const storageRef = ref(this.storage, photoPath);
         const uploadTask = uploadBytesResumable(storageRef, file);
