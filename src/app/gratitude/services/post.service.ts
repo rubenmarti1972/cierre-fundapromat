@@ -1,3 +1,4 @@
+// src/app/gratitude/services/post.service.ts
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
@@ -83,14 +84,20 @@ export class PostService {
 
   /**
    * Eliminar un post (y su imagen si existe)
+   * Soporta AMBAS firmas para compatibilidad:
+   *  - deleteById(id, photoPath?)
+   *  - deleteById(id, photoUrl?, photoPath?)
    */
-  async deleteById(id: string, photoPath?: string | null): Promise<void> {
+  async deleteById(id: string, a?: string | null, b?: string | null): Promise<void> {
     try {
-      if (photoPath) {
+      // Si hay 3 argumentos, el 3ro es photoPath; si no, el 2do puede ser photoPath
+      const photoPath = (b !== undefined ? b : a) ?? null;
+
+      if (photoPath && photoPath.trim().length > 0) {
         try {
           await deleteObject(ref(this.storage, photoPath));
         } catch (e) {
-          console.warn('⚠️ No se encontró imagen para borrar:', photoPath);
+          console.warn('⚠️ No se encontró/borro la imagen:', photoPath, e);
         }
       }
 
@@ -111,7 +118,8 @@ export class PostService {
 
     const deletes = snapshot.docs.map(d => {
       const data = d.data() as Post;
-      return this.deleteById(d.id, data.photoPath ?? null);
+      // Llama explícitamente con 3 args para que el 3ro sea el photoPath
+      return this.deleteById(d.id, undefined, data.photoPath ?? null);
     });
 
     await Promise.all(deletes);
