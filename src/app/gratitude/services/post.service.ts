@@ -25,12 +25,15 @@ import { FirebaseError } from '@angular/fire/app';
 import { BehaviorSubject, Observable, defer } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Post } from '../models/post';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PostService {
 
   private firestore = inject(Firestore);
   private storage = inject(Storage);
+
+  private readonly useStorage = !!(environment as any).useFirebaseStorage;
 
   private collectionRef = collection(this.firestore, 'posts');
   private readonly localStorageKey = 'gratitude-mural-posts';
@@ -73,15 +76,19 @@ export class PostService {
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
         photoPath = `photos/${timestamp}_${safeName}`;
 
-        const storageRef = ref(this.storage, photoPath);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+          const storageRef = ref(this.storage, photoPath);
+          const uploadTask = uploadBytesResumable(storageRef, file);
 
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on('state_changed', () => {}, reject, resolve);
-        });
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on('state_changed', () => {}, reject, resolve);
+          });
 
-        photoUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log('✅ Imagen subida:', photoUrl);
+          photoUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('✅ Imagen subida:', photoUrl);
+        } else {
+          console.log('📸 Convertiendo imagen a Data URL (Storage deshabilitado):', file.name);
+          photoUrl = await this.fileToDataUrl(file);
+        }
       }
 
       await addDoc(this.collectionRef, {
@@ -135,7 +142,7 @@ export class PostService {
       // Si hay 3 argumentos, el 3ro es photoPath; si no, el 2do puede ser photoPath
       const photoPath = (b !== undefined ? b : a) ?? null;
 
-      if (photoPath && photoPath.trim().length > 0) {
+      if (this.useStorage && photoPath && photoPath.trim().length > 0) {
         try {
           await deleteObject(ref(this.storage, photoPath));
         } catch (e) {
