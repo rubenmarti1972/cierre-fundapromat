@@ -1,0 +1,109 @@
+<div class="container">
+  <div class="form-header">
+    <h1>✨ Comparte tu Mensaje ✨</h1>
+    <p>Deja tu huella en nuestro mural matemático</p>
+  </div>
+
+  <form (ngSubmit)="submit()" [formGroup]="form" novalidate>
+    <label>
+      <span class="label-text">📝 Nombre *</span>
+      <input type="text" formControlName="name" placeholder="Tu nombre completo" />
+    </label>
+    <div class="err" *ngIf="showError('name','required')">⚠️ El nombre es obligatorio.</div>
+    <div class="err" *ngIf="showError('name','minlength')">⚠️ Mínimo 2 caracteres.</div>
+    <div class="err" *ngIf="showError('name','maxlength')">⚠️ Máximo 80 caracteres.</div>
+
+    <label>
+      <span class="label-text">💬 Mensaje *</span>
+      <textarea formControlName="message" placeholder="Escribe tu mensaje (máximo 200 caracteres)"></textarea>
+    </label>
+    <div class="err" *ngIf="showError('message','required')">⚠️ El mensaje es obligatorio.</div>
+    <div class="err" *ngIf="showError('message','minlength')">⚠️ Mínimo 2 caracteres.</div>
+    <div class="err" *ngIf="showError('message','maxlength')">⚠️ Máximo 200 caracteres.</div>
+
+    <div class="photo-section">
+      <label>
+        <span class="label-text">📸 Imagen *</span>
+        <p class="help-text">Sube tu foto o elige un sticker matemático</p>
+      </label>
+
+      <!-- Opciones de foto -->
+      <div class="photo-options">
+        <div class="option-card" [class.active]="photoMode === 'upload'">
+          <input 
+            type="radio" 
+            name="photoMode" 
+            value="upload" 
+            [(ngModel)]="photoMode" 
+            [ngModelOptions]="{standalone: true}"
+            id="uploadOption">
+          <label for="uploadOption" class="option-label">
+            <i class="fa-solid fa-upload"></i>
+            <span>Subir foto</span>
+          </label>
+        </div>
+
+        <div class="option-card" [class.active]="photoMode === 'sticker'">
+          <input 
+            type="radio" 
+            name="photoMode" 
+            value="sticker" 
+            [(ngModel)]="photoMode" 
+            [ngModelOptions]="{standalone: true}"
+            id="stickerOption">
+          <label for="stickerOption" class="option-label">
+            <i class="fa-solid fa-image"></i>
+            <span>Sticker matemático</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Upload de archivo -->
+      <div class="upload-area" *ngIf="photoMode === 'upload'">
+        <input 
+          type="file" 
+          accept="image/jpeg,image/png" 
+          (change)="onFileChange($event)"
+          id="fileInput"
+          #fileInput>
+        <label for="fileInput" class="upload-label">
+          <i class="fa-solid fa-cloud-upload-alt"></i>
+          <span>{{ photoFile ? photoFile.name : 'Click para subir tu foto' }}</span>
+          <small>JPEG/PNG • Máximo 5MB</small>
+        </label>
+      </div>
+
+      <!-- Selector de stickers -->
+      <div class="sticker-grid" *ngIf="photoMode === 'sticker'">
+        <div 
+          *ngFor="let sticker of mathStickers" 
+          class="sticker-item"
+          [class.selected]="selectedSticker === sticker"
+          (click)="selectSticker(sticker)">
+          <img [src]="sticker.path" [alt]="sticker.name">
+          <span class="sticker-name">{{ sticker.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="loading" class="submit-btn">
+      <i class="fa-solid" [class.fa-paper-plane]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading"></i>
+      {{ loading ? 'Publicando...' : 'Publicar en el Mural' }}
+    </button>
+    
+    <p class="status" *ngIf="status">{{ status }}</p>
+  </form>
+
+  <div class="actions-footer">
+    <a routerLink="/mural" class="view-mural-link">
+      <i class="fa-solid fa-eye"></i>
+      Ver el Mural Completo
+    </a>
+  </div>
+
+  <!-- Botón de admin discreto -->
+  <div
+    (click)="secretTap()"
+    style="position: fixed; bottom: 0; right: 0; width: 50px; height: 50px; opacity: 0; cursor: default;">
+  </div>
+</div>

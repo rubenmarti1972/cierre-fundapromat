@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.tmp/
+.cache/
+coverage/
+.angular/
+.env*
+# macOS
+.DS_Store
+# IDEs
+.vscode/
+.idea/
