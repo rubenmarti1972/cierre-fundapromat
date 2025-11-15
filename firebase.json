@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "dist/mural-gratitud",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

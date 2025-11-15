@@ -1,11 +1,16 @@
-import { environment } from '../../../environments/environment';
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { PostService } from '../services/post.service';
-import { Router } from '@angular/router';
-import { Post } from '../models/post';
+import { environment } from "../../../environments/environment";
+import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormsModule,
+} from "@angular/forms";
+import { RouterLink } from "@angular/router";
+import { PostService } from "../services/post.service";
+import { Router } from "@angular/router";
+import { Post } from "../models/post";
 
 interface MathSticker {
   name: string;
@@ -13,131 +18,165 @@ interface MathSticker {
 }
 
 @Component({
-  selector: 'app-post-form',
+  selector: "app-post-form",
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, FormsModule],
-  templateUrl: './post-form.component.html',
-  styleUrls: ['./post-form.component.css']
+  templateUrl: "./post-form.component.html",
+  styleUrls: ["./post-form.component.css"],
 })
 export class PostFormComponent {
   loading = false;
-  status = '';
+  status = "";
   photoFile: File | null = null;
-  photoMode: 'upload' | 'sticker' = 'upload';
+  photoMode: "upload" | "sticker" = "upload";
   selectedSticker: MathSticker | null = null;
 
   // Stickers matemáticos predefinidos
-  mathStickers: MathSticker[] = [
-    { name: 'Gato', path: 'assets/stickers/gato.png' },
-   
-  ];
+mathStickers: MathSticker[] = [
+  // PNG
+  { name: "Gato suma", path: "assets/stickers/gato-suma.png" },
+  { name: "Gato gris", path: "assets/stickers/gato-gris.png" },
+  { name: "Gatica", path: "assets/stickers/4.png" },
+  { name: "Griego", path: "assets/stickers/5.png" },
+  { name: "Conejita", path: "assets/stickers/6.png" },
+  { name: "Mono", path: "assets/stickers/mono.png" },
+  { name: "Tangram", path: "assets/stickers/tangram.png" },
+
+  // JPEG
+  { name: "Fracciones", path: "assets/stickers/fracciones.jpeg" },
+  { name: "Magia", path: "assets/stickers/maga.jpeg" },
+  { name: "Corazón", path: "assets/stickers/corazon.jpeg" },
+  { name: "Aguacate", path: "assets/stickers/aguacate.jpeg" },
+  { name: "Droopy", path: "assets/stickers/droopy.jpeg" },
+  { name: "Estrella", path: "assets/stickers/estrella.jpeg" },
+  { name: "Fresa", path: "assets/stickers/fresa.jpeg" },
+  { name: "Geometría", path: "assets/stickers/geometria.jpeg" },
+  { name: "Granado", path: "assets/stickers/granado.jpeg" },
+  { name: "Hipopotenusa", path: "assets/stickers/hipopotenusa.jpeg" },
+  { name: "Números", path: "assets/stickers/numeros.jpeg" },
+  { name: "Pi", path: "assets/stickers/pi.jpeg" },
+];
 
   form = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    country: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    message: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+    name: [
+      "",
+      [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
+    ],
+    country: [
+      "",
+      [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
+    ],
+    message: [
+      "",
+      [Validators.required, Validators.minLength(2), Validators.maxLength(200)],
+    ],
   });
 
-  constructor(private fb: FormBuilder, private posts: PostService, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private posts: PostService,
+    private router: Router
+  ) {}
 
   onFileChange(e: Event) {
     const input = e.target as HTMLInputElement;
     this.photoFile = (input.files && input.files[0]) || null;
     if (this.photoFile) {
       this.selectedSticker = null;
-      this.photoMode = 'upload';
+      this.photoMode = "upload";
     }
   }
 
   selectSticker(sticker: MathSticker) {
     this.selectedSticker = sticker;
     this.photoFile = null;
-    this.photoMode = 'sticker';
+    this.photoMode = "sticker";
   }
 
   async submit() {
     // Validar formulario
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.status = '⚠️ Completa los campos requeridos.';
+      this.status = "⚠️ Completa los campos requeridos.";
       return;
     }
 
     // Validar que hay foto o sticker
     if (!this.photoFile && !this.selectedSticker) {
-      this.status = '⚠️ Debes subir una foto o seleccionar un sticker.';
+      this.status = "⚠️ Debes subir una foto o seleccionar un sticker.";
       return;
     }
 
     this.loading = true;
-    this.status = '📤 Publicando tu mensaje...';
-    
+    this.status = "📤 Publicando tu mensaje...";
+
     try {
       const { name, country, message } = this.form.getRawValue();
-      
+
       // Si es sticker, convertir la URL a File
       let fileToUpload = this.photoFile;
-      
+
       if (this.selectedSticker && !this.photoFile) {
         // Descargar el sticker y convertirlo a File
         const response = await fetch(this.selectedSticker.path);
         const blob = await response.blob();
-        fileToUpload = new File([blob], this.selectedSticker.name + '.png', { type: 'image/png' });
+        fileToUpload = new File([blob], this.selectedSticker.name + ".png", {
+          type: "image/png",
+        });
       }
 
       const payload: Partial<Post> = {
-        name: (name || '').trim(),
-        country: (country || '').trim(),
-        message: (message || '').trim()
+        name: (name || "").trim(),
+        country: (country || "").trim(),
+        message: (message || "").trim(),
       };
 
       await this.posts.create(payload, fileToUpload ?? undefined);
-      
-      this.status = '✅ ¡Publicado exitosamente!';
-      this.form.reset({ name: '', country: '', message: '' });
+
+      this.status = "✅ ¡Publicado exitosamente!";
+      this.form.reset({ name: "", country: "", message: "" });
       this.photoFile = null;
       this.selectedSticker = null;
-      this.photoMode = 'upload';
-      
+      this.photoMode = "upload";
+
       // Redirigir al mural después de 1.5 segundos
       setTimeout(() => {
-        this.router.navigateByUrl('/mural');
+        this.router.navigateByUrl("/mural");
       }, 1500);
-      
     } catch (err: any) {
       console.error(err);
-      this.status = '❌ ' + (err?.message ?? 'Error al publicar.');
+      this.status = "❌ " + (err?.message ?? "Error al publicar.");
     } finally {
       this.loading = false;
     }
   }
 
-  get f() { 
-    return this.form.controls; 
+  get f() {
+    return this.form.controls;
   }
-  
-  showError(ctrl: 'name' | 'country' | 'message', error: string) {
+
+  showError(ctrl: "name" | "country" | "message", error: string) {
     const c = this.f[ctrl];
     return c.touched && c.errors?.[error];
   }
 
   unlockAdmin() {
-    const code = prompt('🔐 Código de administrador:');
+    const code = prompt("🔐 Código de administrador:");
     if (code && code === (environment as any).adminCode) {
-      localStorage.setItem('adminUnlocked', '1');
-      this.router.navigateByUrl('/mural');
+      localStorage.setItem("adminUnlocked", "1");
+      this.router.navigateByUrl("/mural");
     } else if (code) {
-      alert('❌ Código incorrecto');
+      alert("❌ Código incorrecto");
     }
   }
 
   tapCount = 0;
   tapTimeout: any;
-  
+
   secretTap() {
     this.tapCount++;
     clearTimeout(this.tapTimeout);
-    this.tapTimeout = setTimeout(() => this.tapCount = 0, 1200);
+    this.tapTimeout = setTimeout(() => (this.tapCount = 0), 1200);
 
     if (this.tapCount >= 5) {
       this.tapCount = 0;
