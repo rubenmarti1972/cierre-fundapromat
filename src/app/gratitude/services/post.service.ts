@@ -277,6 +277,7 @@ export class PostService {
       console.warn('No se pudo guardar el mural local:', error);
     }
   }
+  
 
   private async fileToDataUrl(file: File): Promise<string> {
     const reader = new FileReader();
